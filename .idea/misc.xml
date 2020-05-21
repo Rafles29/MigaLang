@@ -16,7 +16,7 @@
         <PerGrammarGenerationSettings>
           <option name="fileName" value="$PROJECT_DIR$/src/Demo.g4" />
           <option name="autoGen" value="true" />
-          <option name="outputDir" value="C:\Users\rwozn\Documents\GitHub\MigaLang\src" />
+          <option name="outputDir" value="$PROJECT_DIR$/src" />
           <option name="libDir" value="" />
           <option name="encoding" value="" />
           <option name="pkg" value="" />
@@ -26,7 +26,7 @@
       </list>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_14" default="true" project-jdk-name="openjdk-14" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>

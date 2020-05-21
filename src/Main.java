@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.tree.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        String source = "test.x";
+        String source = "test.miga";
         ANTLRFileStream input = new ANTLRFileStream(source);
 
         DemoLexer lexer = new DemoLexer(input);

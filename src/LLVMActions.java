@@ -1,4 +1,7 @@
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Stack;
 
@@ -15,8 +18,8 @@ class Value{
 
 public class LLVMActions extends DemoBaseListener {
     
-    HashMap<String, VarType> variables = new HashMap<String, VarType>();
-    Stack<Value> stack = new Stack<Value>();
+    HashMap<String, VarType> variables = new HashMap<>();
+    Stack<Value> stack = new Stack<>();
 
     @Override
     public void exitAssign(DemoParser.AssignContext ctx) { 
@@ -34,8 +37,11 @@ public class LLVMActions extends DemoBaseListener {
     }
 
     @Override 
-    public void exitProg(DemoParser.ProgContext ctx) { 
-       System.out.println( LLVMGenerator.generate() );
+    public void exitProg(DemoParser.ProgContext ctx) {
+        var ll = LLVMGenerator.generate();
+
+       System.out.println(ll);
+       writeToFile("output.ll", ll);
     }
 
     @Override 
@@ -117,6 +123,17 @@ public class LLVMActions extends DemoBaseListener {
    void error(int line, String msg){
        System.err.println("Error, line "+line+", "+msg);
        System.exit(1);
-   } 
+   }
+
+    private void writeToFile(String fileName, String data) {
+        BufferedWriter writer;
+        try {
+            writer = new BufferedWriter(new FileWriter(fileName));
+            writer.write(data);
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
        
 }
