@@ -1,4 +1,13 @@
-x = (3+1)*(int)2.9
-z = (real)3
-print x
-print z
+int test
+test = 5 * (int)2.3
+print test
+float testt
+testt = 22.0 / 10.0
+print testt
+
+int cos = 5
+print cos
+
+int[5] tab
+tab[3] = 2
+print tab[3]

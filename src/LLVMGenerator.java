@@ -51,8 +51,18 @@ class LLVMGenerator{
       reg++;
    }
 
+   static void sub_i32(String val1, String val2){
+      main_text += "%"+reg+" = sub i32 "+val2+", "+val1+"\n";
+      reg++;
+   }
+
    static void add_double(String val1, String val2){
       main_text += "%"+reg+" = fadd double "+val1+", "+val2+"\n";
+      reg++;
+   }
+
+   static void sub_double(String val1, String val2){
+      main_text += "%"+reg+" = fsub double "+val2+", "+val1+"\n";
       reg++;
    }
 
@@ -66,8 +76,32 @@ class LLVMGenerator{
       reg++;
    }
 
+   static void div_i32(String val1, String val2){
+      main_text += "%"+reg+" = div i32 "+val2+", "+val1+"\n";
+      reg++;
+   }
+
+   static void div_double(String val1, String val2){
+      main_text += "%"+reg+" = fdiv double "+val2+", "+val1+"\n";
+      reg++;
+   }
+
    static void sitofp(String id){
       main_text += "%"+reg+" = sitofp i32 "+id+" to double\n";
+      reg++;
+   }
+
+   static void declare_tab_i32(String id, String nmbOfElements) {
+      main_text += "%"+id+" =  alloca ["+nmbOfElements+" x i32]\n";
+   }
+
+   static void declare_tab_double(String id, String nmbOfElements) {
+      main_text += "%"+id+" =  alloca ["+nmbOfElements+" x double]\n";
+      reg++;
+   }
+
+   static void load_tab_i32(String id, String element, String len){
+      main_text += "%"+reg+" = getelementptr inbounds ["+len+" x i32], ["+len+" x i32]* %"+id+", i64 0, i64 "+element+"\n";
       reg++;
    }
 
@@ -75,7 +109,6 @@ class LLVMGenerator{
       main_text += "%"+reg+" = fptosi double "+id+" to i32\n";
       reg++;
    }
-
 
    static String generate(){
       String text = "";

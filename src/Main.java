@@ -9,17 +9,17 @@ public class Main {
         String source = "test.miga";
         ANTLRFileStream input = new ANTLRFileStream(source);
 
-        DemoLexer lexer = new DemoLexer(input);
+        MigaLexer lexer = new MigaLexer(input);
 
         CommonTokenStream tokens = new CommonTokenStream(lexer);
-        DemoParser parser = new DemoParser(tokens);
+        MigaParser parser = new MigaParser(tokens);
 
         ParseTree tree = parser.prog(); 
 
         //System.out.println(tree.toStringTree(parser));
 
         ParseTreeWalker walker = new ParseTreeWalker();
-        walker.walk(new LLVMActions(), tree);
+        walker.walk(new MigaActions(), tree);
 
     }
 }

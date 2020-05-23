@@ -5,17 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Stack;
 
-enum VarType{ INT, REAL, UNKNOWN }
-
-class Value{ 
-	public String name;
-	public VarType type;
-	public Value( String name, VarType type ){
-		this.name = name;
-		this.type = type;
-	}
-}
-
+/*
 public class LLVMActions extends DemoBaseListener {
     
     HashMap<String, VarType> variables = new HashMap<>();
@@ -137,3 +127,4 @@ public class LLVMActions extends DemoBaseListener {
     }
        
 }
+*/
