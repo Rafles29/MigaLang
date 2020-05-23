@@ -87,6 +87,7 @@ element:   INT          #int
     | TOINT element     #toint
     | TOREAL element    #toreal
     | ID                #id
+    | get_tab_val #gettabval
 ;
 
 TYPE_NAME: 'int'

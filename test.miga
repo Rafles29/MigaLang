@@ -5,9 +5,14 @@ float testt
 testt = 22.0 / 10.0
 print testt
 
-int cos = 5
+int cos = test
+print cos
 print cos
 
 int[5] tab
-tab[3] = 2
-print tab[3]
+tab[1] = 2222
+cos = tab[1]
+print cos
+tab[1] = test
+print tab[1]
+

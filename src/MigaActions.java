@@ -199,6 +199,33 @@ public class MigaActions extends MigaBaseListener {
     }
 
     @Override
+    public void exitId(MigaParser.IdContext ctx) {
+        var ID = ctx.ID().getText();
+        var type = variables.get(ID);
+        if( type == VarType.INT ){
+            stack.push( new Value("%"+(LLVMGenerator.reg), VarType.INT) );
+            LLVMGenerator.load_i32(ID);
+        }
+        if( type == VarType.REAL ){
+            stack.push( new Value("%"+(LLVMGenerator.reg), VarType.REAL) );
+            LLVMGenerator.load_double(ID);
+        }
+    }
+
+    @Override
+    public void exitGettabval(MigaParser.GettabvalContext ctx) {
+        var tab = stack.pop();
+        if( tab.type == VarType.INT ){
+            stack.push( new Value("%"+(LLVMGenerator.reg), VarType.INT) );
+            LLVMGenerator.load_i32(tab.name);
+        }
+        if( tab.type == VarType.REAL ){
+            stack.push( new Value("%"+(LLVMGenerator.reg), VarType.REAL) );
+            LLVMGenerator.load_double(tab.name);
+        }
+    }
+
+    @Override
     public void exitToint(MigaParser.TointContext ctx) {
         Value v = stack.pop();
         LLVMGenerator.fptosi( v.name );
