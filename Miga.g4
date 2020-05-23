@@ -1,6 +1,6 @@
 grammar Miga;
 
-prog: ( (stat|function)? NEWLINE )*
+prog: block
 ;
 
 block: ( stat? NEWLINE )*
@@ -12,6 +12,12 @@ stat: declare
     | tab_lang
 	| system_func
 	| loop
+	| if_statement
+;
+if_block: block
+;
+
+if_statement: IF conditional BEGIN if_block END
 ;
 
 function: FUNCTION WS ID WS LEFT_ROUND_BRACKET fparam RIGHT_ROUND_BRACKET WS BEGIN block END

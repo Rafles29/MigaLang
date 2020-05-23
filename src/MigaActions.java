@@ -248,6 +248,24 @@ public class MigaActions extends MigaBaseListener {
     }
 
     @Override
+    public void enterIf_block(MigaParser.If_blockContext ctx) {
+        LLVMGenerator.ifstart();
+    }
+
+    @Override
+    public void exitIf_block(MigaParser.If_blockContext ctx) {
+        LLVMGenerator.ifend();
+    }
+
+    @Override
+    public void exitEqual(MigaParser.EqualContext ctx) {
+        var var1 = stack.pop().name;
+        var var2 = stack.pop().name;
+        LLVMGenerator.icmp(var1, var2);
+        super.exitEqual(ctx);
+    }
+
+    @Override
     public void exitPrint(MigaParser.PrintContext ctx) {
         String ID = ctx.ID().getText();
         VarType type = variables.get(ID);

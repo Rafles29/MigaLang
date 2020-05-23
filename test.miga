@@ -16,3 +16,10 @@ print cos
 tab[1] = test
 print tab[1]
 
+if 3 == 3 {
+int testIf = 5555
+print testIf
+}
+print tab[1]
+
+
