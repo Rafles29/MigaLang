@@ -63,7 +63,7 @@ tab_lang: declare_tab
 declare_tab: TYPE_NAME LEFT_BRACKET INT RIGHT_BRACKET ID
 ;
 
-get_tab_val: ID LEFT_BRACKET INT RIGHT_BRACKET
+get_tab_val: ID LEFT_BRACKET expr RIGHT_BRACKET
 ;
 
 set_tab_val: get_tab_val ASSIGN expr

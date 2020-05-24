@@ -198,12 +198,12 @@ class LLVMGenerator{
    }
 
    static void load_tab_i32(String id, String element, String len){
-      main_text += "%"+reg+" = getelementptr inbounds ["+len+" x i32], ["+len+" x i32]* %"+id+", i64 0, i64 "+element+"\n";
+      main_text += "%"+reg+" = getelementptr inbounds ["+len+" x i32], ["+len+" x i32]* %"+id+", i32 0, i32 "+element+"\n";
       reg++;
    }
 
    static void load_tab_double(String id, String element, String len){
-      main_text += "%"+reg+" = getelementptr inbounds ["+len+" x double], ["+len+" x double]* %"+id+", i64 0, i64 "+element+"\n";
+      main_text += "%"+reg+" = getelementptr inbounds ["+len+" x double], ["+len+" x double]* %"+id+", i32 0, i32 "+element+"\n";
       reg++;
    }
 

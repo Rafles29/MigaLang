@@ -78,16 +78,16 @@ public class MigaActions extends MigaBaseListener {
     @Override
     public void exitGet_tab_val(MigaParser.Get_tab_valContext ctx) {
         String ID = ctx.ID().getText();
-        String element = ctx.INT().getText();
+        var element = stack.pop();
         var tab = tabs.get(ID);
 
         if( tab.type == VarType.INT ){
             stack.push( new Value(""+(LLVMGenerator.reg), VarType.INT) );
-            LLVMGenerator.load_tab_i32(ID, element, tab.length);
+            LLVMGenerator.load_tab_i32(ID, element.name, tab.length);
         }
         if( tab.type == VarType.REAL ){
             stack.push( new Value(""+(LLVMGenerator.reg), VarType.REAL) );
-            LLVMGenerator.load_tab_double(ID, element, tab.length);
+            LLVMGenerator.load_tab_double(ID, element.name, tab.length);
         }
     }
 
