@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Stack;
 
 enum VarType{ INT, REAL, UNKNOWN }
@@ -32,7 +33,28 @@ class Tab {
 public class MigaActions extends MigaBaseListener {
     HashMap<String, VarType> variables = new HashMap<>();
     HashMap<String, Tab> tabs = new HashMap<>();
+    HashMap<String, VarType> functions = new HashMap<>();
     Stack<Value> stack = new Stack<>();
+    Boolean global = false;
+
+    @Override
+    public void enterFunction(MigaParser.FunctionContext ctx) {
+        var ID = ctx.ID().getText();
+        var type = getTypeName(ctx.TYPE_NAME().toString(), ctx);
+        functions.put(ID, type);
+        LLVMGenerator.functionstart(ID);
+    }
+
+    @Override
+    public void exitFunction(MigaParser.FunctionContext ctx) {
+        LLVMGenerator.functionend();
+    }
+
+    @Override
+    public void exitFunc_call(MigaParser.Func_callContext ctx) {
+        var ID = ctx.ID().getText();
+        LLVMGenerator.call(ID);
+    }
 
     @Override
     public void exitAssign(MigaParser.AssignContext ctx) {
@@ -54,10 +76,10 @@ public class MigaActions extends MigaBaseListener {
         variables.put(ID, v);
 
         if( v == VarType.INT ){
-            LLVMGenerator.declare_i32(ID);
+            LLVMGenerator.declare_i32(ID, global);
         }
         if( v == VarType.REAL ){
-            LLVMGenerator.declare_double(ID);
+            LLVMGenerator.declare_double(ID, global);
         }
     }
 
@@ -111,10 +133,10 @@ public class MigaActions extends MigaBaseListener {
         variables.put(ID, v);
 
         if( v == VarType.INT ){
-            LLVMGenerator.declare_i32(ID);
+            LLVMGenerator.declare_i32(ID, global);
         }
         if( v == VarType.REAL ){
-            LLVMGenerator.declare_double(ID);
+            LLVMGenerator.declare_double(ID, global);
         }
     }
 
@@ -243,6 +265,7 @@ public class MigaActions extends MigaBaseListener {
 
     @Override
     public void exitProg(MigaParser.ProgContext ctx) {
+        LLVMGenerator.close_main();
         var ll = LLVMGenerator.generate();
 
         System.out.println(ll);

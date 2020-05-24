@@ -13,6 +13,8 @@ stat: declare
 	| system_func
 	| loop
 	| if_statement
+	| func_call
+	| function
 ;
 if_block: block
 ;
@@ -20,10 +22,16 @@ if_block: block
 if_statement: IF conditional BEGIN if_block END
 ;
 
-function: FUNCTION WS ID WS LEFT_ROUND_BRACKET fparam RIGHT_ROUND_BRACKET WS BEGIN block END
+fblock: block
 ;
 
-fparam: ID
+func_call: ID LEFT_ROUND_BRACKET RIGHT_ROUND_BRACKET
+;
+
+function: FUNCTION TYPE_NAME ID BEGIN fblock END
+;
+
+fparam: LEFT_ROUND_BRACKET ID RIGHT_ROUND_BRACKET
 ;
 
 loop_cond: conditional
@@ -90,7 +98,7 @@ arithemtic_expr:  element   #single_value
     | element SUBTRACT element  #subtract
     | element MULT element  #mult
     | element DIVIDE element    #divide
-    | '(' expr ')'  #par
+    | '(' arithemtic_expr ')'  #par
 ;
 
 element:   INT          #int

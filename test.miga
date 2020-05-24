@@ -1,12 +1,10 @@
-int[3] tab
+int v = 100
+print v
 
-int i = 0
-while i < 3 {
-tab[i] = i
-i = i + 1
+func int dej {
+int a = 5
+print a
 }
-i = 0
-while i < 3 {
-print tab[i]
-i = i + 1
-}
+
+print v
+dej()
