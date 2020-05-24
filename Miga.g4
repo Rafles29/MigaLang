@@ -110,6 +110,7 @@ element:   INT          #int
     | TOREAL element    #toreal
     | ID                #id
     | get_tab_val #gettabval
+    | func_call #funccal
 ;
 
 TYPE_NAME: 'int'

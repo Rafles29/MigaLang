@@ -40,9 +40,14 @@ public class MigaActions extends MigaBaseListener {
     @Override
     public void enterFunction(MigaParser.FunctionContext ctx) {
         var ID = ctx.ID().getText();
-        var type = getTypeName(ctx.TYPE_NAME().toString(), ctx);
-        functions.put(ID, type);
-        LLVMGenerator.functionstart(ID);
+        var funcType = getTypeName(ctx.TYPE_NAME().toString(), ctx);
+        functions.put(ID, funcType);
+        if( funcType == VarType.INT ){
+            LLVMGenerator.functionstart_i32(ID);
+        }
+        if( funcType == VarType.REAL ){
+            LLVMGenerator.functionstart_double(ID);
+        }
     }
 
     @Override
@@ -53,7 +58,15 @@ public class MigaActions extends MigaBaseListener {
     @Override
     public void exitFunc_call(MigaParser.Func_callContext ctx) {
         var ID = ctx.ID().getText();
-        LLVMGenerator.call(ID);
+        var funcType = functions.get(ID);
+        if( funcType == VarType.INT ){
+            stack.push( new Value("%"+(LLVMGenerator.reg), VarType.INT) );
+            LLVMGenerator.call_i32(ID);
+        }
+        if( funcType == VarType.REAL ){
+            stack.push( new Value("%"+(LLVMGenerator.reg), VarType.REAL) );
+            LLVMGenerator.call_double(ID);
+        }
     }
 
     @Override
@@ -247,6 +260,11 @@ public class MigaActions extends MigaBaseListener {
             stack.push( new Value("%"+(LLVMGenerator.reg), VarType.REAL) );
             LLVMGenerator.load_double(tab.name);
         }
+    }
+
+    @Override
+    public void exitFunccal(MigaParser.FunccalContext ctx) {
+        super.exitFunccal(ctx);
     }
 
     @Override
@@ -467,13 +485,12 @@ public class MigaActions extends MigaBaseListener {
     private VarType getTypeName(String type, ParserRuleContext ctx) {
         VarType ans;
         switch (type) {
-            case "int": ans = VarType.INT;
-            break;
-            case "float": ans = VarType.REAL;
-            break;
-            default: ans = VarType.UNKNOWN;
+            case "int" -> ans = VarType.INT;
+            case "float" -> ans = VarType.REAL;
+            default -> {
+                ans = VarType.UNKNOWN;
                 error(ctx.getStart().getLine(), "unknown type");
-            break;
+            }
         }
         return ans;
     }

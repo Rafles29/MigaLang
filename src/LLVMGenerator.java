@@ -11,15 +11,21 @@ class LLVMGenerator{
 
    static Stack<Integer> brstack = new Stack<>();
 
-   static void functionstart(String id){
+   static void functionstart_i32(String id){
       main_text += buffer;
       main_reg = reg;
       buffer = "define i32 @"+id+"() nounwind {\n";
       reg = 1;
    }
 
+   static void functionstart_double(String id){
+      main_text += buffer;
+      main_reg = reg;
+      buffer = "define double @"+id+"() nounwind {\n";
+      reg = 1;
+   }
+
    static void functionend(){
-      //return_i32("0");
       buffer += "}\n";
       header_text += buffer;
       buffer = "";
@@ -34,8 +40,13 @@ class LLVMGenerator{
       buffer += "ret double "+val+"\n";
    }
 
-   static void call(String id){
+   static void call_i32(String id){
       buffer += "%"+reg+" = call i32 @"+id+"()\n";
+      reg++;
+   }
+
+   static void call_double(String id){
+      buffer += "%"+reg+" = call double @"+id+"()\n";
       reg++;
    }
 
