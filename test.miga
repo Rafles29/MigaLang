@@ -1,9 +1,4 @@
-int test = 5 + (int)2.3
-int i = 0
-while i < 4 {
-print i
-i = i + 1
-}
-int a = 123
-print a
-
+float readTest = 2.2
+print readTest
+read readTest
+print readTest

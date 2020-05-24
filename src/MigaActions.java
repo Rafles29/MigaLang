@@ -401,6 +401,18 @@ public class MigaActions extends MigaBaseListener {
         }
     }
 
+    @Override
+    public void exitRead(MigaParser.ReadContext ctx) {
+        String ID = ctx.ID().getText();
+        var v = variables.get(ID);
+        if( v == VarType.INT ) {
+            LLVMGenerator.scanf_i32(ID);
+        }
+        if( v == VarType.REAL ) {
+            LLVMGenerator.scanf_double(ID);
+        }
+    }
+
     private void error(int line, String msg){
         System.err.println("Error, line "+line+", "+msg);
         System.exit(1);
