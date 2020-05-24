@@ -26,16 +26,22 @@ function: FUNCTION WS ID WS LEFT_ROUND_BRACKET fparam RIGHT_ROUND_BRACKET WS BEG
 fparam: ID
 ;
 
-loop: LOOP WS  conditional WS BEGIN block END
+loop_cond: conditional
+;
+
+loop_block: block
+;
+
+loop: LOOP loop_cond BEGIN loop_block END
 ;
 
 
 conditional: expr EQUAL_SIGN expr #equal
     | expr NOT_EQUAL_SIGN expr #notequal
     | expr LESS_SIGN expr #less
-    | expr LESS_EQUAL_SIGN #lessequal
-    | expr MORE_SIGN #more
-    | expr MORE_EQUAL_SIGN #moreequal
+    | expr LESS_EQUAL_SIGN expr #lessequal
+    | expr MORE_SIGN expr #more
+    | expr MORE_EQUAL_SIGN expr #moreequal
 ;
 
 declare: TYPE_NAME ID

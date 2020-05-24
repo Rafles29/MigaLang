@@ -1,3 +1,5 @@
+import org.antlr.v4.runtime.ParserRuleContext;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -48,7 +50,7 @@ public class MigaActions extends MigaBaseListener {
     @Override
     public void exitDeclare(MigaParser.DeclareContext ctx) {
         String ID = ctx.ID().getText();
-        VarType v = getTypeName(ctx.TYPE_NAME().toString());
+        VarType v = getTypeName(ctx.TYPE_NAME().toString(), ctx);
         variables.put(ID, v);
 
         if( v == VarType.INT ){
@@ -63,9 +65,8 @@ public class MigaActions extends MigaBaseListener {
     public void exitDeclare_tab(MigaParser.Declare_tabContext ctx) {
         String ID = ctx.ID().getText();
         String len = ctx.INT().getText();
-        VarType v = getTypeName(ctx.TYPE_NAME().getText());
+        VarType v = getTypeName(ctx.TYPE_NAME().getText(), ctx);
         tabs.put(ID, new Tab(ID, v, len));
-
         if( v == VarType.INT ){
             LLVMGenerator.declare_tab_i32(ID, len);
         }
@@ -81,11 +82,12 @@ public class MigaActions extends MigaBaseListener {
         var tab = tabs.get(ID);
 
         if( tab.type == VarType.INT ){
+            stack.push( new Value(""+(LLVMGenerator.reg), VarType.INT) );
             LLVMGenerator.load_tab_i32(ID, element, tab.length);
-            stack.push( new Value(""+(LLVMGenerator.reg-1), VarType.INT) );
         }
         if( tab.type == VarType.REAL ){
-
+            stack.push( new Value(""+(LLVMGenerator.reg), VarType.REAL) );
+            LLVMGenerator.load_tab_double(ID, element, tab.length);
         }
     }
 
@@ -93,19 +95,19 @@ public class MigaActions extends MigaBaseListener {
     public void exitSet_tab_val(MigaParser.Set_tab_valContext ctx) {
         Value v = stack.pop();
         var tab = stack.pop();
-        if( v.type == VarType.INT ){
+        if( v.type == VarType.INT ) {
             LLVMGenerator.assign_i32(tab.name, v.name);
         }
-        if( v.type == VarType.REAL ){
+        if( v.type == VarType.REAL ) {
+            LLVMGenerator.assign_double(tab.name, v.name);
         }
 
     }
 
     @Override
     public void enterDeclare_and_assign(MigaParser.Declare_and_assignContext ctx) {
-        VarType v = getTypeName(ctx.TYPE_NAME().toString());
+        VarType v = getTypeName(ctx.TYPE_NAME().toString(), ctx);
         String ID = ctx.assign().ID().getText();
-
         variables.put(ID, v);
 
         if( v == VarType.INT ){
@@ -122,12 +124,12 @@ public class MigaActions extends MigaBaseListener {
         Value v2 = stack.pop();
         if( v1.type == v2.type ) {
             if( v1.type == VarType.INT ){
+                stack.push( new Value("%"+(LLVMGenerator.reg), VarType.INT) );
                 LLVMGenerator.add_i32(v1.name, v2.name);
-                stack.push( new Value("%"+(LLVMGenerator.reg-1), VarType.INT) );
             }
             if( v1.type == VarType.REAL ){
+                stack.push( new Value("%"+(LLVMGenerator.reg), VarType.REAL) );
                 LLVMGenerator.add_double(v1.name, v2.name);
-                stack.push( new Value("%"+(LLVMGenerator.reg-1), VarType.REAL) );
             }
         } else {
             error(ctx.getStart().getLine(), "add type mismatch");
@@ -140,15 +142,15 @@ public class MigaActions extends MigaBaseListener {
         Value v2 = stack.pop();
         if( v1.type == v2.type ) {
             if( v1.type == VarType.INT ){
+                stack.push( new Value("%"+(LLVMGenerator.reg), VarType.INT) );
                 LLVMGenerator.sub_i32(v1.name, v2.name);
-                stack.push( new Value("%"+(LLVMGenerator.reg-1), VarType.INT) );
             }
             if( v1.type == VarType.REAL ){
+                stack.push( new Value("%"+(LLVMGenerator.reg), VarType.REAL) );
                 LLVMGenerator.sub_double(v1.name, v2.name);
-                stack.push( new Value("%"+(LLVMGenerator.reg-1), VarType.REAL) );
             }
         } else {
-            error(ctx.getStart().getLine(), "add type mismatch");
+            error(ctx.getStart().getLine(), "subtract type mismatch");
         }
     }
 
@@ -158,15 +160,15 @@ public class MigaActions extends MigaBaseListener {
         Value v2 = stack.pop();
         if( v1.type == v2.type ) {
             if( v1.type == VarType.INT ){
+                stack.push( new Value("%"+(LLVMGenerator.reg), VarType.INT) );
                 LLVMGenerator.mult_i32(v1.name, v2.name);
-                stack.push( new Value("%"+(LLVMGenerator.reg-1), VarType.INT) );
             }
             if( v1.type == VarType.REAL ){
+                stack.push( new Value("%"+(LLVMGenerator.reg), VarType.REAL) );
                 LLVMGenerator.mult_double(v1.name, v2.name);
-                stack.push( new Value("%"+(LLVMGenerator.reg-1), VarType.REAL) );
             }
         } else {
-            error(ctx.getStart().getLine(), "add type mismatch");
+            error(ctx.getStart().getLine(), "multiply type mismatch");
         }
     }
 
@@ -176,15 +178,15 @@ public class MigaActions extends MigaBaseListener {
         Value v2 = stack.pop();
         if( v1.type == v2.type ) {
             if( v1.type == VarType.INT ){
+                stack.push( new Value("%"+(LLVMGenerator.reg), VarType.INT) );
                 LLVMGenerator.div_i32(v1.name, v2.name);
-                stack.push( new Value("%"+(LLVMGenerator.reg-1), VarType.INT) );
             }
             if( v1.type == VarType.REAL ){
+                stack.push( new Value("%"+(LLVMGenerator.reg), VarType.REAL) );
                 LLVMGenerator.div_double(v1.name, v2.name);
-                stack.push( new Value("%"+(LLVMGenerator.reg-1), VarType.REAL) );
             }
         } else {
-            error(ctx.getStart().getLine(), "add type mismatch");
+            error(ctx.getStart().getLine(), "division type mismatch");
         }
     }
 
@@ -228,15 +230,15 @@ public class MigaActions extends MigaBaseListener {
     @Override
     public void exitToint(MigaParser.TointContext ctx) {
         Value v = stack.pop();
+        stack.push( new Value("%"+(LLVMGenerator.reg), VarType.INT) );
         LLVMGenerator.fptosi( v.name );
-        stack.push( new Value("%"+(LLVMGenerator.reg-1), VarType.INT) );
     }
 
     @Override
     public void exitToreal(MigaParser.TorealContext ctx) {
         Value v = stack.pop();
+        stack.push( new Value("%"+(LLVMGenerator.reg), VarType.REAL) );
         LLVMGenerator.sitofp( v.name );
-        stack.push( new Value("%"+(LLVMGenerator.reg-1), VarType.REAL) );
     }
 
     @Override
@@ -258,11 +260,114 @@ public class MigaActions extends MigaBaseListener {
     }
 
     @Override
+    public void enterLoop(MigaParser.LoopContext ctx) {
+        LLVMGenerator.while_start();
+    }
+
+    @Override
+    public void exitLoop_block(MigaParser.Loop_blockContext ctx) {
+        LLVMGenerator.while_end();
+    }
+
+    @Override
+    public void exitLoop_cond(MigaParser.Loop_condContext ctx) {
+        LLVMGenerator.while_cond_end();
+    }
+
+    @Override
     public void exitEqual(MigaParser.EqualContext ctx) {
-        var var1 = stack.pop().name;
-        var var2 = stack.pop().name;
-        LLVMGenerator.icmp(var1, var2);
-        super.exitEqual(ctx);
+        var v1 = stack.pop();
+        var v2 = stack.pop();
+        if( v1.type == v2.type ) {
+            if( v1.type == VarType.INT ){
+                LLVMGenerator.equal_i32(v1.name, v2.name);
+            }
+            if( v1.type == VarType.REAL ){
+                LLVMGenerator.equal_double(v1.name, v2.name);
+            }
+        } else {
+            error(ctx.getStart().getLine(), "type mismatch");
+        }
+    }
+
+    @Override
+    public void exitNotequal(MigaParser.NotequalContext ctx) {
+        var v1 = stack.pop();
+        var v2 = stack.pop();
+        if( v1.type == v2.type ) {
+            if( v1.type == VarType.INT ){
+                LLVMGenerator.notequal_i32(v1.name, v2.name);
+            }
+            if( v1.type == VarType.REAL ){
+                LLVMGenerator.notequal_double(v1.name, v2.name);
+            }
+        } else {
+            error(ctx.getStart().getLine(), "type mismatch");
+        }
+    }
+
+    @Override
+    public void exitLess(MigaParser.LessContext ctx) {
+        var v1 = stack.pop();
+        var v2 = stack.pop();
+        if( v1.type == v2.type ) {
+            if( v1.type == VarType.INT ){
+                LLVMGenerator.less_i32(v1.name, v2.name);
+            }
+            if( v1.type == VarType.REAL ){
+                LLVMGenerator.less_double(v1.name, v2.name);
+            }
+        } else {
+            error(ctx.getStart().getLine(), "type mismatch");
+        }
+    }
+
+    @Override
+    public void exitLessequal(MigaParser.LessequalContext ctx) {
+        var v1 = stack.pop();
+        var v2 = stack.pop();
+        if( v1.type == v2.type ) {
+            if( v1.type == VarType.INT ){
+                LLVMGenerator.less_equal_i32(v1.name, v2.name);
+            }
+            if( v1.type == VarType.REAL ){
+                LLVMGenerator.less_equal_double(v1.name, v2.name);
+            }
+        } else {
+            error(ctx.getStart().getLine(), "type mismatch");
+        }
+    }
+
+    @Override
+    public void exitMore(MigaParser.MoreContext ctx) {
+        var v1 = stack.pop();
+        var v2 = stack.pop();
+        if( v1.type == v2.type ) {
+            if( v1.type == VarType.INT ){
+                LLVMGenerator.more_i32(v1.name, v2.name);
+            }
+            if( v1.type == VarType.REAL ){
+                LLVMGenerator.more_double(v1.name, v2.name);
+            }
+        } else {
+            error(ctx.getStart().getLine(), "type mismatch");
+        }
+    }
+
+    @Override
+    public void exitMoreequal(MigaParser.MoreequalContext ctx) {
+        var v1 = stack.pop();
+        var v2 = stack.pop();
+        if( v1.type == v2.type ) {
+            if( v1.type == VarType.INT ){
+                LLVMGenerator.more_equal_i32(v1.name, v2.name);
+            }
+            if( v1.type == VarType.REAL ){
+                LLVMGenerator.more_equal_double(v1.name, v2.name);
+            }
+        } else {
+            error(ctx.getStart().getLine(), "type mismatch");
+        }
     }
 
     @Override
@@ -312,7 +417,7 @@ public class MigaActions extends MigaBaseListener {
         }
     }
 
-    private VarType getTypeName(String type) {
+    private VarType getTypeName(String type, ParserRuleContext ctx) {
         VarType ans;
         switch (type) {
             case "int": ans = VarType.INT;
@@ -320,6 +425,7 @@ public class MigaActions extends MigaBaseListener {
             case "float": ans = VarType.REAL;
             break;
             default: ans = VarType.UNKNOWN;
+                error(ctx.getStart().getLine(), "unknown type");
             break;
         }
         return ans;

@@ -1,25 +1,9 @@
-int test
-test = 5 * (int)2.3
-print test
-float testt
-testt = 22.0 / 10.0
-print testt
-
-int cos = test
-print cos
-print cos
-
-int[5] tab
-tab[1] = 2222
-cos = tab[1]
-print cos
-tab[1] = test
-print tab[1]
-
-if 3 == 3 {
-int testIf = 5555
-print testIf
+int test = 5 + (int)2.3
+int i = 0
+while i < 4 {
+print i
+i = i + 1
 }
-print tab[1]
-
+int a = 123
+print a
 

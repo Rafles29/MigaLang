@@ -22,26 +22,98 @@ class LLVMGenerator{
       main_text += "false"+b+":\n";
    }
 
-   static void icmp(String val1, String val2){
-      //main_text += "%"+reg+" = load i32, i32* %"+id+"\n";
-      //reg++;
-      main_text += "%"+reg+" = icmp eq i32 "+(val1)+", "+val2+"\n";
+   static void while_start() {
+      br++;
+      main_text += "br label %cond"+br+"\n";
+      main_text += "cond"+br+":\n";
+   }
+
+   static void while_cond_end() {
+      main_text += "br i1 %"+(reg-1)+", label %true"+br+", label %false"+br+"\n";
+      main_text += "true"+br+":\n";
+      brstack.push(br);
+   }
+
+   static void while_end(){
+      int b = brstack.pop();
+      main_text += "br label %cond"+b+"\n";
+      main_text += "false"+b+":\n";
+   }
+
+   static void equal_i32(String val1, String val2){
+      main_text += "%"+reg+" = icmp eq i32 "+(val2)+", "+val1+"\n";
       reg++;
    }
 
-   static void printf_i32(String id){
-      main_text += "%"+reg+" = load i32, i32* %"+id+"\n";
+   static void notequal_i32(String val1, String val2){
+      main_text += "%"+reg+" = icmp ne i32 "+(val2)+", "+val1+"\n";
       reg++;
+   }
+
+   static void less_i32(String val1, String val2){
+      main_text += "%"+reg+" = icmp slt i32 "+(val2)+", "+val1+"\n";
+      reg++;
+   }
+
+   static void more_i32(String val1, String val2){
+      main_text += "%"+reg+" = icmp sgt i32 "+(val2)+", "+val1+"\n";
+      reg++;
+   }
+
+   static void less_equal_i32(String val1, String val2){
+      main_text += "%"+reg+" = icmp sle i32 "+(val2)+", "+val1+"\n";
+      reg++;
+   }
+
+   static void more_equal_i32(String val1, String val2){
+      main_text += "%"+reg+" = icmp sge i32 "+(val2)+", "+val1+"\n";
+      reg++;
+   }
+
+   static void equal_double(String val1, String val2){
+      main_text += "%"+reg+" = fcmp oeq double "+(val2)+", "+val1+"\n";
+      reg++;
+   }
+
+   static void notequal_double(String val1, String val2){
+      main_text += "%"+reg+" = fcmp une double "+(val2)+", "+val1+"\n";
+      reg++;
+   }
+
+   static void less_double(String val1, String val2){
+      main_text += "%"+reg+" = fcmp olt double "+(val2)+", "+val1+"\n";
+      reg++;
+   }
+
+   static void more_double(String val1, String val2){
+      main_text += "%"+reg+" = fcmp ogt double "+(val2)+", "+val1+"\n";
+      reg++;
+   }
+
+   static void less_equal_double(String val1, String val2){
+      main_text += "%"+reg+" = fcmp ole double "+(val2)+", "+val1+"\n";
+      reg++;
+   }
+
+   static void more_equal_double(String val1, String val2){
+      main_text += "%"+reg+" = fcmp oge double "+(val2)+", "+val1+"\n";
+      reg++;
+   }
+
+
+   static void printf_i32(String id){
+      load_i32(id);
       main_text += "%"+reg+" = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpi, i32 0, i32 0), i32 %"+(reg-1)+")\n";
       reg++;
    }
 
    static void printf_double(String id){
-      main_text += "%"+reg+" = load double, double* %"+id+"\n";
-      reg++;
+      load_double(id);
       main_text += "%"+reg+" = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpd, i32 0, i32 0), double %"+(reg-1)+")\n";
       reg++;
    }
+
+
 
    static void declare_i32(String id){
       main_text += "%"+id+" = alloca i32\n";
@@ -110,18 +182,12 @@ class LLVMGenerator{
       reg++;
    }
 
-   static void sitofp(String id){
-      main_text += "%"+reg+" = sitofp i32 "+id+" to double\n";
-      reg++;
-   }
-
    static void declare_tab_i32(String id, String nmbOfElements) {
       main_text += "%"+id+" =  alloca ["+nmbOfElements+" x i32]\n";
    }
 
    static void declare_tab_double(String id, String nmbOfElements) {
       main_text += "%"+id+" =  alloca ["+nmbOfElements+" x double]\n";
-      reg++;
    }
 
    static void load_tab_i32(String id, String element, String len){
@@ -129,8 +195,18 @@ class LLVMGenerator{
       reg++;
    }
 
+   static void load_tab_double(String id, String element, String len){
+      main_text += "%"+reg+" = getelementptr inbounds ["+len+" x double], ["+len+" x double]* %"+id+", i64 0, i64 "+element+"\n";
+      reg++;
+   }
+
    static void fptosi(String id){
       main_text += "%"+reg+" = fptosi double "+id+" to i32\n";
+      reg++;
+   }
+
+   static void sitofp(String id){
+      main_text += "%"+reg+" = sitofp i32 "+id+" to double\n";
       reg++;
    }
 
