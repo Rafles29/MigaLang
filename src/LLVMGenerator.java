@@ -19,11 +19,19 @@ class LLVMGenerator{
    }
 
    static void functionend(){
-      buffer += "ret i32 0\n";
+      //return_i32("0");
       buffer += "}\n";
       header_text += buffer;
       buffer = "";
       reg = main_reg;
+   }
+
+   static  void return_i32(String val) {
+      buffer += "ret i32 "+val+"\n";
+   }
+
+   static  void return_double(String val) {
+      buffer += "ret double "+val+"\n";
    }
 
    static void call(String id){

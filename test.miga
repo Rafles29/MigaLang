@@ -4,6 +4,7 @@ print v
 func int dej {
 int a = 5
 print a
+return a
 }
 
 print v

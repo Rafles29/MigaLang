@@ -1,6 +1,6 @@
 grammar Miga;
 
-prog: block
+prog: ( (stat|function)? NEWLINE )*
 ;
 
 block: ( stat? NEWLINE )*
@@ -14,7 +14,6 @@ stat: declare
 	| loop
 	| if_statement
 	| func_call
-	| function
 ;
 if_block: block
 ;
@@ -82,12 +81,16 @@ print_tab: PRINT get_tab_val
 
 system_func: print
     | read
+    | return_stat
 ;
 
 print: PRINT ID
 ;
 
 read: READ ID
+;
+
+return_stat: RETURN expr
 ;
 
 expr:  arithemtic_expr
@@ -112,6 +115,9 @@ element:   INT          #int
 TYPE_NAME: 'int'
     | 'float'
     | 'string'
+;
+
+RETURN: 'return'
 ;
 
 PRINT:	'print'

@@ -273,6 +273,18 @@ public class MigaActions extends MigaBaseListener {
     }
 
     @Override
+    public void exitReturn_stat(MigaParser.Return_statContext ctx) {
+        var v = stack.pop();
+
+        if( v.type == VarType.INT ){
+            LLVMGenerator.return_i32(v.name);
+        }
+        if( v.type == VarType.REAL ){
+            LLVMGenerator.return_double(v.name);
+        }
+    }
+
+    @Override
     public void enterIf_block(MigaParser.If_blockContext ctx) {
         LLVMGenerator.ifstart();
     }
