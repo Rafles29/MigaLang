@@ -1,3 +1,5 @@
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Stack;
 
 class LLVMGenerator{
@@ -282,6 +284,39 @@ class LLVMGenerator{
       var address = "@.str."+reg;
       header_text += address+" = private unnamed_addr constant ["+output.length()+" x i8] c"+output.substring(0,output.length()-1)+"\\0A\\00\"\n";
       buffer += "%"+reg+" = call i32 (i8*, ...) @printf(i8* getelementptr inbounds (["+output.length()+" x i8], ["+output.length()+" x i8]* "+address+", i32 0, i32 0))\n";
+      reg++;
+   }
+
+   static void create_struct(Struct newStruct) {
+      header_text += "%struct."+newStruct.name+" = type { ";
+      for (int i = 0; i<newStruct.types.size(); i++) {
+         if (i == newStruct.types.size()-1) {
+            if (newStruct.types.get(i).type == VarType.INT) {
+               header_text += "i32";
+            } else {
+               header_text += "double";
+            }
+         } else {
+            if (newStruct.types.get(i).type == VarType.INT) {
+               header_text += "i32, ";
+            } else {
+               header_text += "double, ";
+            }
+         }
+      }
+      header_text += " }\n";
+   }
+
+   static void declare_struct(String structName, String id, boolean global) {
+      if( global ){
+         header_text += "@"+id+" = common global %struct."+structName+" zeroinitializer\n";
+      } else {
+         buffer += "%"+id+" = alloca %struct."+structName+"\n";
+      }
+   }
+
+   static void load_struct(String structName, String id, String element){
+      buffer += "%"+reg+" = getelementptr inbounds %struct."+structName+", %struct."+structName+"* "+id+", i32 0, i32 "+element+"\n";
       reg++;
    }
 

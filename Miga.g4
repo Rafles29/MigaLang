@@ -14,6 +14,7 @@ stat: declare
 	| loop
 	| if_statement
 	| func_call
+	| struct_lang
 ;
 if_block: block
 ;
@@ -58,6 +59,31 @@ assign: ID ASSIGN expr
 ;
 
 declare_and_assign: TYPE_NAME assign
+;
+
+struct_lang: declare_struct
+    | get_struct_val
+    | set_struct_val
+    | print_struct_val
+    | create_struct
+;
+
+struct_block: ( (TYPE_NAME ID)? NEWLINE )*
+;
+
+create_struct: STRUCT ID BEGIN struct_block END
+;
+
+declare_struct: STRUCT ID ID
+;
+
+get_struct_val: ID '.' ID
+;
+
+set_struct_val: get_struct_val ASSIGN expr
+;
+
+print_struct_val: PRINT get_struct_val
 ;
 
 tab_lang: declare_tab
@@ -111,11 +137,14 @@ element:   INT          #int
     | ID                #id
     | get_tab_val #gettabval
     | func_call #funccal
+    | get_struct_val #getstructval
+;
+
+STRUCT: 'struct'
 ;
 
 TYPE_NAME: 'int'
     | 'float'
-    | 'string'
 ;
 
 RETURN: 'return'

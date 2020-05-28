@@ -3,9 +3,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Stack;
+import java.util.*;
 
 enum VarType{ INT, REAL, UNKNOWN }
 
@@ -15,6 +13,15 @@ class Value{
     public Value( String name, VarType type ){
         this.name = name;
         this.type = type;
+    }
+}
+
+class Struct {
+    public String name;
+    public ArrayList<Value> types = new ArrayList<Value>();
+
+    public Struct(String name) {
+        this.name = name;
     }
 }
 
@@ -33,10 +40,13 @@ class Tab {
 public class MigaActions extends MigaBaseListener {
     HashMap<String, VarType> variables = new HashMap<>();
     HashMap<String, VarType> globalVariables = new HashMap<>();
+    HashMap<String, Struct> structs = new HashMap<>();
+    HashMap<String, String> structVariables = new HashMap<>();
     HashMap<String, Tab> tabs = new HashMap<>();
     HashMap<String, VarType> functions = new HashMap<>();
     Stack<Value> stack = new Stack<>();
     Boolean global = true;
+    Struct tmpStruct;
 
     @Override
     public void enterFunction(MigaParser.FunctionContext ctx) {
@@ -128,6 +138,45 @@ public class MigaActions extends MigaBaseListener {
         if( tab.type == VarType.REAL ){
             stack.push( new Value(""+(LLVMGenerator.reg), VarType.REAL) );
             LLVMGenerator.load_tab_double(addPrefix(tab.name), element.name, tab.length);
+        }
+    }
+
+    @Override
+    public void exitGet_struct_val(MigaParser.Get_struct_valContext ctx) {
+        var id = ctx.ID(0).getText();
+        var field = ctx.ID(1).getText();
+        var structName = structVariables.get(id);
+
+        var struct = structs.get(structName);
+        struct.types.get(0);
+
+        int index = 0;
+        for (int i = 0; i< struct.types.size(); i++) {
+            if (struct.types.get(i).name == field) {
+                index = i;
+            }
+        }
+        var structField = struct.types.get(index);
+
+        if( structField.type == VarType.INT ){
+            stack.push( new Value(""+(LLVMGenerator.reg), VarType.INT) );
+            LLVMGenerator.load_struct(structName, addPrefix(id), Integer.toString(struct.types.indexOf(structField)));
+        }
+        if( structField.type == VarType.REAL ){
+            stack.push( new Value(""+(LLVMGenerator.reg), VarType.REAL) );
+            LLVMGenerator.load_tab_double(structName, addPrefix(id), Integer.toString(struct.types.indexOf(structField)));
+        }
+    }
+
+    @Override
+    public void exitSet_struct_val(MigaParser.Set_struct_valContext ctx) {
+        Value v = stack.pop();
+        var struct = stack.pop();
+        if( v.type == VarType.INT ) {
+            LLVMGenerator.assign_i32(addPrefix(struct.name), v.name);
+        }
+        if( v.type == VarType.REAL ) {
+            LLVMGenerator.assign_double(addPrefix(struct.name), v.name);
         }
     }
 
@@ -255,6 +304,19 @@ public class MigaActions extends MigaBaseListener {
 
     @Override
     public void exitGettabval(MigaParser.GettabvalContext ctx) {
+        var tab = stack.pop();
+        if( tab.type == VarType.INT ){
+            stack.push( new Value("%"+(LLVMGenerator.reg), VarType.INT) );
+            LLVMGenerator.load_i32(addPrefix(tab.name));
+        }
+        if( tab.type == VarType.REAL ){
+            stack.push( new Value("%"+(LLVMGenerator.reg), VarType.REAL) );
+            LLVMGenerator.load_double(addPrefix(tab.name));
+        }
+    }
+
+    @Override
+    public void exitGetstructval(MigaParser.GetstructvalContext ctx) {
         var tab = stack.pop();
         if( tab.type == VarType.INT ){
             stack.push( new Value("%"+(LLVMGenerator.reg), VarType.INT) );
@@ -472,6 +534,34 @@ public class MigaActions extends MigaBaseListener {
         if( v == VarType.REAL ) {
             LLVMGenerator.scanf_double(addPrefix(ID));
         }
+    }
+
+    @Override
+    public void enterCreate_struct(MigaParser.Create_structContext ctx) {
+        var name = ctx.ID().getText();
+        tmpStruct = new Struct(name);
+        structs.put(name, tmpStruct);
+    }
+
+    @Override
+    public void exitStruct_block(MigaParser.Struct_blockContext ctx) {
+        for (int i = 0; i < ctx.ID().size(); i++)
+            tmpStruct.types.add(new Value(ctx.ID(i).getText(), getTypeName(ctx.TYPE_NAME(i).getText(), ctx)));
+    }
+
+    @Override
+    public void exitCreate_struct(MigaParser.Create_structContext ctx) {
+        LLVMGenerator.create_struct(tmpStruct);
+    }
+
+    @Override
+    public void exitDeclare_struct(MigaParser.Declare_structContext ctx) {
+        var structName = ctx.ID(0).getText();
+        var varName = ctx.ID(1).getText();
+
+        putVariable(varName, VarType.UNKNOWN);
+        structVariables.put(varName, structName);
+        LLVMGenerator.declare_struct(structName, varName, global);
     }
 
     private void putVariable(String name, VarType type) {

@@ -2,9 +2,10 @@ func float dej {
     float a = 3.2 * 1.1
     return a
 }
-
+struct book {
+    int id
+}
 int c = (int)dej()
-
 int i = 0
 int tmp = 0
 while i < c {
@@ -27,5 +28,10 @@ while i <= 9 {
 
 int readt = 5
 read readt
-
 print readt
+
+print "Hello World!"
+struct book mybook
+mybook.id = 222
+int teststr = mybook.id
+print teststr
