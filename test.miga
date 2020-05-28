@@ -29,5 +29,3 @@ int readt = 5
 read readt
 
 print readt
-
-print "dupa"

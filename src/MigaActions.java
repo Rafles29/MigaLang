@@ -32,13 +32,15 @@ class Tab {
 
 public class MigaActions extends MigaBaseListener {
     HashMap<String, VarType> variables = new HashMap<>();
+    HashMap<String, VarType> globalVariables = new HashMap<>();
     HashMap<String, Tab> tabs = new HashMap<>();
     HashMap<String, VarType> functions = new HashMap<>();
     Stack<Value> stack = new Stack<>();
-    Boolean global = false;
+    Boolean global = true;
 
     @Override
     public void enterFunction(MigaParser.FunctionContext ctx) {
+        global = false;
         var ID = ctx.ID().getText();
         var funcType = getTypeName(ctx.TYPE_NAME().toString(), ctx);
         functions.put(ID, funcType);
@@ -52,6 +54,8 @@ public class MigaActions extends MigaBaseListener {
 
     @Override
     public void exitFunction(MigaParser.FunctionContext ctx) {
+        global = true;
+        variables = new HashMap<>();
         LLVMGenerator.functionend();
     }
 
@@ -73,12 +77,12 @@ public class MigaActions extends MigaBaseListener {
     public void exitAssign(MigaParser.AssignContext ctx) {
         String ID = ctx.ID().getText();
         Value v = stack.pop();
-        variables.put(ID, v.type);
+        putVariable(ID, v.type);
         if( v.type == VarType.INT ){
-            LLVMGenerator.assign_i32("%"+ID, v.name);
+            LLVMGenerator.assign_i32(addPrefix(ID), v.name);
         }
         if( v.type == VarType.REAL ){
-            LLVMGenerator.assign_double("%"+ID, v.name);
+            LLVMGenerator.assign_double(addPrefix(ID), v.name);
         }
     }
 
@@ -86,7 +90,7 @@ public class MigaActions extends MigaBaseListener {
     public void exitDeclare(MigaParser.DeclareContext ctx) {
         String ID = ctx.ID().getText();
         VarType v = getTypeName(ctx.TYPE_NAME().toString(), ctx);
-        variables.put(ID, v);
+        putVariable(ID, v);
 
         if( v == VarType.INT ){
             LLVMGenerator.declare_i32(ID, global);
@@ -102,11 +106,12 @@ public class MigaActions extends MigaBaseListener {
         String len = ctx.INT().getText();
         VarType v = getTypeName(ctx.TYPE_NAME().getText(), ctx);
         tabs.put(ID, new Tab(ID, v, len));
+        putVariable(ID, v);
         if( v == VarType.INT ){
-            LLVMGenerator.declare_tab_i32(ID, len);
+            LLVMGenerator.declare_tab_i32(ID, len, global);
         }
         if( v == VarType.REAL ){
-            LLVMGenerator.declare_tab_double(ID, len);
+            LLVMGenerator.declare_tab_double(ID, len, global);
         }
     }
 
@@ -118,11 +123,11 @@ public class MigaActions extends MigaBaseListener {
 
         if( tab.type == VarType.INT ){
             stack.push( new Value(""+(LLVMGenerator.reg), VarType.INT) );
-            LLVMGenerator.load_tab_i32("%"+ID, element.name, tab.length);
+            LLVMGenerator.load_tab_i32(addPrefix(tab.name), element.name, tab.length);
         }
         if( tab.type == VarType.REAL ){
             stack.push( new Value(""+(LLVMGenerator.reg), VarType.REAL) );
-            LLVMGenerator.load_tab_double("%"+ID, element.name, tab.length);
+            LLVMGenerator.load_tab_double(addPrefix(tab.name), element.name, tab.length);
         }
     }
 
@@ -131,10 +136,10 @@ public class MigaActions extends MigaBaseListener {
         Value v = stack.pop();
         var tab = stack.pop();
         if( v.type == VarType.INT ) {
-            LLVMGenerator.assign_i32("%"+tab.name, v.name);
+            LLVMGenerator.assign_i32(addPrefix(tab.name), v.name);
         }
         if( v.type == VarType.REAL ) {
-            LLVMGenerator.assign_double("%"+tab.name, v.name);
+            LLVMGenerator.assign_double(addPrefix(tab.name), v.name);
         }
 
     }
@@ -143,7 +148,6 @@ public class MigaActions extends MigaBaseListener {
     public void enterDeclare_and_assign(MigaParser.Declare_and_assignContext ctx) {
         VarType v = getTypeName(ctx.TYPE_NAME().toString(), ctx);
         String ID = ctx.assign().ID().getText();
-        variables.put("%"+ID, v);
 
         if( v == VarType.INT ){
             LLVMGenerator.declare_i32(ID, global);
@@ -238,14 +242,14 @@ public class MigaActions extends MigaBaseListener {
     @Override
     public void exitId(MigaParser.IdContext ctx) {
         var ID = ctx.ID().getText();
-        var type = variables.get(ID);
+        var type = getVariable(ID);
         if( type == VarType.INT ){
             stack.push( new Value("%"+(LLVMGenerator.reg), VarType.INT) );
-            LLVMGenerator.load_i32(ID);
+            LLVMGenerator.load_i32(addPrefix(ID));
         }
         if( type == VarType.REAL ){
             stack.push( new Value("%"+(LLVMGenerator.reg), VarType.REAL) );
-            LLVMGenerator.load_double(ID);
+            LLVMGenerator.load_double(addPrefix(ID));
         }
     }
 
@@ -254,11 +258,11 @@ public class MigaActions extends MigaBaseListener {
         var tab = stack.pop();
         if( tab.type == VarType.INT ){
             stack.push( new Value("%"+(LLVMGenerator.reg), VarType.INT) );
-            LLVMGenerator.load_i32(tab.name);
+            LLVMGenerator.load_i32(addPrefix(tab.name));
         }
         if( tab.type == VarType.REAL ){
             stack.push( new Value("%"+(LLVMGenerator.reg), VarType.REAL) );
-            LLVMGenerator.load_double(tab.name);
+            LLVMGenerator.load_double(addPrefix(tab.name));
         }
     }
 
@@ -429,13 +433,13 @@ public class MigaActions extends MigaBaseListener {
             LLVMGenerator.print_String(ctx.STRING().getText());
         } else {
             String ID = ctx.ID().getText();
-            VarType type = variables.get(ID);
+            VarType type = getVariable(ID);
             if (type != null) {
                 if (type == VarType.INT) {
-                    LLVMGenerator.printf_i32(ID);
+                    LLVMGenerator.printf_i32(addPrefix(ID));
                 }
                 if (type == VarType.REAL) {
-                    LLVMGenerator.printf_double(ID);
+                    LLVMGenerator.printf_double(addPrefix(ID));
                 }
             } else {
                 error(ctx.getStart().getLine(), "unknown variable " + ID);
@@ -448,10 +452,10 @@ public class MigaActions extends MigaBaseListener {
         var tab_element = stack.pop();
         if(tab_element.type != null ) {
             if( tab_element.type == VarType.INT ){
-                LLVMGenerator.printf_i32( tab_element.name );
+                LLVMGenerator.printf_i32(addPrefix(tab_element.name) );
             }
             if( tab_element.type == VarType.REAL ){
-                LLVMGenerator.printf_double( tab_element.name );
+                LLVMGenerator.printf_double(addPrefix(tab_element.name) );
             }
         } else {
             error(ctx.getStart().getLine(), "unknown variable "+tab_element.name);
@@ -461,13 +465,37 @@ public class MigaActions extends MigaBaseListener {
     @Override
     public void exitRead(MigaParser.ReadContext ctx) {
         String ID = ctx.ID().getText();
-        var v = variables.get(ID);
+        var v = getVariable(ID);
         if( v == VarType.INT ) {
-            LLVMGenerator.scanf_i32(ID);
+            LLVMGenerator.scanf_i32(addPrefix(ID));
         }
         if( v == VarType.REAL ) {
-            LLVMGenerator.scanf_double(ID);
+            LLVMGenerator.scanf_double(addPrefix(ID));
         }
+    }
+
+    private void putVariable(String name, VarType type) {
+        if (global) {
+            globalVariables.put(name, type);
+        } else {
+            variables.put(name, type);
+        }
+    }
+
+    private VarType getVariable(String name) {
+        if (isVarGlobal(name)) {
+            return globalVariables.get(name);
+        } else {
+            return variables.get(name);
+        }
+    }
+
+    private boolean isVarGlobal(String name) {
+        return globalVariables.get(name) != null;
+    }
+
+    private String addPrefix(String name) {
+        return  isVarGlobal(name) ? "@" + name: "%" + name;
     }
 
     private void error(int line, String msg){

@@ -158,12 +158,12 @@ class LLVMGenerator{
    }
 
    static void scanf_i32(String id){
-      buffer += "%"+reg+" = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strsi, i32 0, i32 0), i32* %"+id+")\n";
+      buffer += "%"+reg+" = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strsi, i32 0, i32 0), i32* "+id+")\n";
       reg++;
    }
 
    static void scanf_double(String id){
-      buffer += "%"+reg+" = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strsd, i32 0, i32 0), double* %"+id+")\n";
+      buffer += "%"+reg+" = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strsd, i32 0, i32 0), double* "+id+")\n";
       reg++;
    }
 
@@ -193,12 +193,12 @@ class LLVMGenerator{
 
 
    static void load_i32(String id){
-      buffer += "%"+reg+" = load i32, i32* %"+id+"\n";
+      buffer += "%"+reg+" = load i32, i32* "+id+"\n";
       reg++;
    }
 
    static void load_double(String id){
-      buffer += "%"+reg+" = load double, double* %"+id+"\n";
+      buffer += "%"+reg+" = load double, double* "+id+"\n";
       reg++;
    }
 
@@ -242,12 +242,20 @@ class LLVMGenerator{
       reg++;
    }
 
-   static void declare_tab_i32(String id, String nmbOfElements) {
-      buffer += "%"+id+" =  alloca ["+nmbOfElements+" x i32]\n";
+   static void declare_tab_i32(String id, String nmbOfElements, boolean global) {
+      if (global) {
+         header_text += "@"+id+" = common global ["+nmbOfElements+" x i32] zeroinitializer\n";
+      } else {
+         buffer += "%"+id+" =  alloca ["+nmbOfElements+" x i32]\n";
+      }
    }
 
-   static void declare_tab_double(String id, String nmbOfElements) {
-      buffer += "%"+id+" =  alloca ["+nmbOfElements+" x double]\n";
+   static void declare_tab_double(String id, String nmbOfElements, boolean global) {
+      if (global) {
+         header_text += "@"+id+" = common global ["+nmbOfElements+" x double] zeroinitializer\n";
+      } else {
+         buffer += "%"+id+" =  alloca ["+nmbOfElements+" x double]\n";
+      }
    }
 
    static void fptosi(String id){
