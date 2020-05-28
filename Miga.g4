@@ -85,6 +85,7 @@ system_func: print
 ;
 
 print: PRINT ID
+    | PRINT STRING
 ;
 
 read: READ ID

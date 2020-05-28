@@ -425,17 +425,21 @@ public class MigaActions extends MigaBaseListener {
 
     @Override
     public void exitPrint(MigaParser.PrintContext ctx) {
-        String ID = ctx.ID().getText();
-        VarType type = variables.get(ID);
-        if( type != null ) {
-            if( type == VarType.INT ){
-                LLVMGenerator.printf_i32( ID );
-            }
-            if( type == VarType.REAL ){
-                LLVMGenerator.printf_double( ID );
-            }
+        if (ctx.STRING() != null) {
+            LLVMGenerator.print_String(ctx.STRING().getText());
         } else {
-            error(ctx.getStart().getLine(), "unknown variable "+ID);
+            String ID = ctx.ID().getText();
+            VarType type = variables.get(ID);
+            if (type != null) {
+                if (type == VarType.INT) {
+                    LLVMGenerator.printf_i32(ID);
+                }
+                if (type == VarType.REAL) {
+                    LLVMGenerator.printf_double(ID);
+                }
+            } else {
+                error(ctx.getStart().getLine(), "unknown variable " + ID);
+            }
         }
     }
 

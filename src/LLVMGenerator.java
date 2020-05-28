@@ -270,6 +270,13 @@ class LLVMGenerator{
       reg++;
    }
 
+   static void print_String(String output) {
+      var address = "@.str."+reg;
+      header_text += address+" = private unnamed_addr constant ["+output.length()+" x i8] c"+output.substring(0,output.length()-1)+"\\0A\\00\"\n";
+      buffer += "%"+reg+" = call i32 (i8*, ...) @printf(i8* getelementptr inbounds (["+output.length()+" x i8], ["+output.length()+" x i8]* "+address+", i32 0, i32 0))\n";
+      reg++;
+   }
+
    static String generate(){
       String text = "";
       text += "declare i32 @printf(i8*, ...)\n";
