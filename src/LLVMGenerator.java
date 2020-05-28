@@ -177,18 +177,18 @@ class LLVMGenerator{
 
    static void declare_double(String id, Boolean global){
       if( global ){
-         header_text += "@"+id+" = global double 0\n";
+         header_text += "@"+id+" = global double 0.0\n";
       } else {
          buffer += "%"+id+" = alloca double\n";
       }
    }
 
-   static void assign_i32(String id, String value){
-      buffer += "store i32 "+value+", i32* %"+id+"\n";
+   static void assign_i32(String id, String value) {
+      buffer += "store i32 "+value+", i32* "+id+"\n";
    }
 
-   static void assign_double(String id, String value){
-      buffer += "store double "+value+", double* %"+id+"\n";
+   static void assign_double(String id, String value) {
+      buffer += "store double "+value+", double* "+id+"\n";
    }
 
 
@@ -250,16 +250,6 @@ class LLVMGenerator{
       buffer += "%"+id+" =  alloca ["+nmbOfElements+" x double]\n";
    }
 
-   static void load_tab_i32(String id, String element, String len){
-      buffer += "%"+reg+" = getelementptr inbounds ["+len+" x i32], ["+len+" x i32]* %"+id+", i32 0, i32 "+element+"\n";
-      reg++;
-   }
-
-   static void load_tab_double(String id, String element, String len){
-      buffer += "%"+reg+" = getelementptr inbounds ["+len+" x double], ["+len+" x double]* %"+id+", i32 0, i32 "+element+"\n";
-      reg++;
-   }
-
    static void fptosi(String id){
       buffer += "%"+reg+" = fptosi double "+id+" to i32\n";
       reg++;
@@ -267,6 +257,16 @@ class LLVMGenerator{
 
    static void sitofp(String id){
       buffer += "%"+reg+" = sitofp i32 "+id+" to double\n";
+      reg++;
+   }
+
+   static void load_tab_i32(String id, String element, String len){
+      buffer += "%"+reg+" = getelementptr inbounds ["+len+" x i32], ["+len+" x i32]* "+id+", i32 0, i32 "+element+"\n";
+      reg++;
+   }
+
+   static void load_tab_double(String id, String element, String len){
+      buffer += "%"+reg+" = getelementptr inbounds ["+len+" x double], ["+len+" x double]* "+id+", i32 0, i32 "+element+"\n";
       reg++;
    }
 

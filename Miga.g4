@@ -55,7 +55,6 @@ declare: TYPE_NAME ID
 ;
 
 assign: ID ASSIGN expr
-    | ID ASSIGN STRING
 ;
 
 declare_and_assign: TYPE_NAME assign

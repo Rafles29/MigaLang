@@ -25,13 +25,9 @@ while i <= 9 {
     i = i+1
 }
 
-print "Hello World!"
-
 int readt = 5
 read readt
 
 print readt
 
-
-
-
+print "dupa"
