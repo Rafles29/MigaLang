@@ -289,21 +289,14 @@ class LLVMGenerator{
 
    static void create_struct(Struct newStruct) {
       header_text += "%struct."+newStruct.name+" = type { ";
-      for (int i = 0; i<newStruct.types.size(); i++) {
-         if (i == newStruct.types.size()-1) {
-            if (newStruct.types.get(i).type == VarType.INT) {
-               header_text += "i32";
-            } else {
-               header_text += "double";
-            }
-         } else {
-            if (newStruct.types.get(i).type == VarType.INT) {
-               header_text += "i32, ";
-            } else {
-               header_text += "double, ";
-            }
+      newStruct.types.forEach(value -> {
+         if (value.type == VarType.INT) {
+            header_text += "i32, ";
          }
-      }
+         else
+            header_text += "double, ";
+      });
+      header_text =  header_text.substring(0, header_text.length()-2);
       header_text += " }\n";
    }
 

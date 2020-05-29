@@ -1,9 +1,13 @@
+int x = 55
+
 func float dej {
     float a = 3.2 * 1.1
+    print x
     return a
 }
 struct book {
     int id
+    float price
 }
 int c = (int)dej()
 int i = 0
@@ -33,5 +37,8 @@ print readt
 print "Hello World!"
 struct book mybook
 mybook.id = 222
+mybook.price = 55.2
 int teststr = mybook.id
 print teststr
+print mybook.id
+print mybook.price

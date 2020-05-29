@@ -152,7 +152,7 @@ public class MigaActions extends MigaBaseListener {
 
         int index = 0;
         for (int i = 0; i< struct.types.size(); i++) {
-            if (struct.types.get(i).name == field) {
+            if (struct.types.get(i).name.equals(field)) {
                 index = i;
             }
         }
@@ -164,7 +164,7 @@ public class MigaActions extends MigaBaseListener {
         }
         if( structField.type == VarType.REAL ){
             stack.push( new Value(""+(LLVMGenerator.reg), VarType.REAL) );
-            LLVMGenerator.load_tab_double(structName, addPrefix(id), Integer.toString(struct.types.indexOf(structField)));
+            LLVMGenerator.load_struct(structName, addPrefix(id), Integer.toString(struct.types.indexOf(structField)));
         }
     }
 
@@ -511,6 +511,21 @@ public class MigaActions extends MigaBaseListener {
 
     @Override
     public void exitPrint_tab(MigaParser.Print_tabContext ctx) {
+        var tab_element = stack.pop();
+        if(tab_element.type != null ) {
+            if( tab_element.type == VarType.INT ){
+                LLVMGenerator.printf_i32(addPrefix(tab_element.name) );
+            }
+            if( tab_element.type == VarType.REAL ){
+                LLVMGenerator.printf_double(addPrefix(tab_element.name) );
+            }
+        } else {
+            error(ctx.getStart().getLine(), "unknown variable "+tab_element.name);
+        }
+    }
+
+    @Override
+    public void exitPrint_struct_val(MigaParser.Print_struct_valContext ctx) {
         var tab_element = stack.pop();
         if(tab_element.type != null ) {
             if( tab_element.type == VarType.INT ){
